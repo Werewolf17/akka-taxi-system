@@ -24,6 +24,6 @@ This is a service through which a specific Location can be checked whether it is
 
 ### Instructions
 In order to run the program execute:
-'''% sbt run'''
+```% sbt run```
 For unit tests run the following:
-'''% sbt test'''
+```% sbt test```
