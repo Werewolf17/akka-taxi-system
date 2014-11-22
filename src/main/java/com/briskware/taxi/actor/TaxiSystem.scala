@@ -24,7 +24,7 @@ class Taxi extends Actor with ActorLogging {
   val gps = context.actorOf(Props[GPS], s"gps-for-${self.path.name}")
   val scheduler = context.actorOf(Props[Scheduler], s"scheduler-for-${self.path.name}")
 
-  // looked up pre-existing actors
+  // looked-up unsupervised actors
   lazy val tubeLocationService = context.actorSelection("akka://taxi-system/user/management-centre/tube-location-service")
 
   override def preStart(): Unit = {
@@ -32,16 +32,17 @@ class Taxi extends Actor with ActorLogging {
     scheduler ! StartScheduler
   }
 
-  override def postStop(): Unit = {
-    scheduler ! StopScheduler
-    super.postStop()
-  }
-
   override def receive = {
     case ReportLocation => gps ! GetLocation
     case LocationResponse(loc) => handleLocationResponse(loc)
   }
 
+  /**
+   * Delegating to the Tube Location Service to compute if the location is near the a Tube Station.
+   * This is done via a Future in order to preserve the context. This would not have been necessary, since we are reporting
+   * back to the parent of this Actor (the management centre), however
+   * the code below just shows a different way of interacting with Actors and I wanted to demonstrate it here.
+   */
   private def handleLocationResponse(loc: Location) = {
     implicit val dispatcher = context.dispatcher
     implicit val timeout = Timeout(1 second)

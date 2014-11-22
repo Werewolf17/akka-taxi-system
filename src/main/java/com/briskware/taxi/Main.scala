@@ -11,6 +11,7 @@ object Main extends App {
   val system = ActorSystem("taxi-system")
   implicit val dispatcher = system.dispatcher
 
+  // create the management centre - this kicks off the whole processing
   val managementCentre = system.actorOf(Props(classOf[ManagementCentre], 1000), "management-centre")
 
   // shut down the management centre once we feel it has run long enough
