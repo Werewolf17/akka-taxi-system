@@ -3,7 +3,7 @@ akka-taxi-system
 
 Example of a simple Akka-based Actor System.
 
-![actor supervision hierarchy](/doc / Taxi System Actor Supervision Hierarchy.pdf)
+![actor supervision hierarchy](/doc/TaxiSystemActorSupervisionHierarchy.png?raw=true)
 
 ### Actors
 
