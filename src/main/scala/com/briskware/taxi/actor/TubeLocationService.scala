@@ -17,8 +17,12 @@ class TubeLocationService extends Actor with ActorLogging {
    */
   val distance = 1D/60D
 
+  var count = 0L
+
   override def receive: Receive = {
-    case CloseToTubeStation(loc) => sender ! CloseToTubeStationResponse(isCloseToTubeStation(loc))
+    case CloseToTubeStation(loc) =>
+      count += 1
+      sender ! CloseToTubeStationResponse(isCloseToTubeStation(loc))
   }
 
   private def isCloseToTubeStation(loc: Location) = loc match {
@@ -26,4 +30,8 @@ class TubeLocationService extends Actor with ActorLogging {
     case _ => false
   }
 
+  override def postStop(): Unit = {
+    super.postStop()
+    log.info(s"actor ${self.path.name} processed $count messages.")
+  }
 }

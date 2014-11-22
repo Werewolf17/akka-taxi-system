@@ -20,7 +20,7 @@ class Taxi extends Actor with ActorLogging {
 
   implicit val dispatcher = context.system.dispatcher
 
-  /// supervised actors
+  /// creating supervised actors
   val gps = context.actorOf(Props[GPS], s"gps-for-${self.path.name}")
   val scheduler = context.actorOf(Props[Scheduler], s"scheduler-for-${self.path.name}")
 
@@ -50,6 +50,7 @@ class Taxi extends Actor with ActorLogging {
     isCloseFuture onComplete {
       case Success(CloseToTubeStationResponse(isClose)) =>
         if (isClose) context.parent ! LocationReport(loc)
+      case _ => //nop
     }
   }
 
@@ -92,11 +93,19 @@ private sealed class Scheduler extends Actor with ActorLogging {
 
   override def receive = {
     case StartScheduler =>
-      log.info("starting")
-      schedule = Some(context.system.scheduler.schedule(1 seconds, 50 milliseconds, sender, ReportLocation))
+      if ( !schedule.isDefined ) {
+        log.info("starting")
+        schedule = Some(context.system.scheduler.schedule(1 seconds, 50 milliseconds, sender, ReportLocation))
+      } else {
+        log.info("already started!")
+      }
     case StopScheduler =>
-      schedule map { _.cancel() }
-      log.info("stopped")
+      schedule map { s =>
+        s.cancel()
+        log.info("stopped")
+      }
+      schedule = None
+
   }
 
 }
