@@ -12,15 +12,17 @@ case class CloseToTubeStationResponse(isClose: Boolean)
  */
 class TubeLocationService extends Actor with ActorLogging {
 
-  // tolerance is 1 minute lat/long
-  val tolerance = 1D/60D
+  /**
+   * distance is 1 minute lat/long
+   */
+  val distance = 1D/60D
 
   override def receive: Receive = {
     case CloseToTubeStation(loc) => sender ! CloseToTubeStationResponse(isCloseToTubeStation(loc))
   }
 
   private def isCloseToTubeStation(loc: Location) = loc match {
-    case Location(long,lat) if  Math.abs(Math.abs(lat) - 50.0D)  < tolerance  && Math.abs(long) < tolerance => true
+    case Location(long,lat) if Math.abs(Math.abs(lat) - 50.0D) < distance && Math.abs(long) < distance => true
     case _ => false
   }
 

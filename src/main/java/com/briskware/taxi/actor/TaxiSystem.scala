@@ -11,6 +11,9 @@ import com.briskware.taxi.model.Location
 
 import scala.util.Success
 
+/*
+ * Taxi Actor
+ */
 case object ReportLocation
 
 class Taxi extends Actor with ActorLogging {
@@ -34,7 +37,7 @@ class Taxi extends Actor with ActorLogging {
     super.postStop()
   }
 
-  override def receive: Receive = {
+  override def receive = {
     case ReportLocation => gps ! GetLocation
     case LocationResponse(loc) => handleLocationResponse(loc)
   }
@@ -42,7 +45,6 @@ class Taxi extends Actor with ActorLogging {
   private def handleLocationResponse(loc: Location) = {
     implicit val dispatcher = context.dispatcher
     implicit val timeout = Timeout(1 second)
-
     val isCloseFuture = tubeLocationService ? CloseToTubeStation(loc)
     isCloseFuture onComplete {
       case Success(CloseToTubeStationResponse(isClose)) =>
@@ -52,11 +54,15 @@ class Taxi extends Actor with ActorLogging {
 
 }
 
+/*
+ * GPS Actor
+ */
 case object GetLocation
 case class LocationResponse(loc: Location)
 
 private sealed class GPS extends Actor with ActorLogging {
-  override def receive: Actor.Receive = {
+
+  override def receive = {
     case GetLocation => sender ! LocationResponse(getRandomLocation())
   }
 
@@ -71,6 +77,9 @@ private sealed class GPS extends Actor with ActorLogging {
 
 }
 
+/*
+ * Scheduler Actor
+ */
 case object StartScheduler
 case object StopScheduler
 
@@ -80,11 +89,13 @@ private sealed class Scheduler extends Actor with ActorLogging {
 
   var schedule: Option[Cancellable] = None
 
-  override def receive: Actor.Receive = {
+  override def receive = {
     case StartScheduler =>
+      log.info("starting")
       schedule = Some(context.system.scheduler.schedule(1 seconds, 50 milliseconds, sender, ReportLocation))
     case StopScheduler =>
       schedule map { _.cancel() }
+      log.info("stopped")
   }
 
 }

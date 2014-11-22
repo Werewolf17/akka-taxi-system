@@ -11,13 +11,13 @@ class ManagementCentre(val numberOfTaxis: Int) extends Actor with ActorLogging {
 
   override def preStart() = {
     for (i <- 1 to numberOfTaxis) {
-      context.actorOf(Props[Taxi], s"Taxi-$i")
+      context.actorOf(Props[Taxi], s"taxi-$i")
     }
     super.preStart()
   }
 
   override def receive: Receive = {
-    case LocationReport(loc) => log.info(s"Received ${loc} from ${sender.path.name}")
+    case LocationReport(loc) => log.info(s"received ${loc} from ${sender.path.name}")
   }
 
   override def postStop(): Unit = {
