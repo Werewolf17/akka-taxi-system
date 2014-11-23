@@ -11,7 +11,7 @@ class SchedulerSpec(_system: ActorSystem) extends TestKit(_system) with Implicit
 
   def this() = this(ActorSystem("taxi-system"))
 
-  val tls = system.actorOf(Props(classOf[Scheduler], self, 50 milliseconds, 100 milliseconds), "scheduler")
+  val scheduler = system.actorOf(Props(classOf[Scheduler], self, 50 milliseconds, 100 milliseconds), "scheduler")
 
   override def afterAll {
     TestKit.shutdownActorSystem(system)
@@ -29,7 +29,7 @@ class SchedulerSpec(_system: ActorSystem) extends TestKit(_system) with Implicit
     "not send events even if StopScheduler is sent" in {
 
       within(500 millis) {
-        tls ! StopScheduler
+        scheduler ! StopScheduler
         expectNoMsg()
       }
     }
@@ -37,10 +37,10 @@ class SchedulerSpec(_system: ActorSystem) extends TestKit(_system) with Implicit
     "start sending events when started and stop sending when stopped" in {
 
       within(500 millis) {
-        tls ! StartScheduler
+        scheduler ! StartScheduler
         expectMsg(200 milliseconds, SchedulerFiring)
         expectMsg(200 milliseconds, SchedulerFiring)
-        tls ! StopScheduler
+        scheduler ! StopScheduler
         expectNoMsg()
       }
     }
@@ -48,9 +48,9 @@ class SchedulerSpec(_system: ActorSystem) extends TestKit(_system) with Implicit
     "not sent events stopped multiple times" in {
 
       within(300 millis) {
-        tls ! StopScheduler
+        scheduler ! StopScheduler
         expectNoMsg(100 millis)
-        tls ! StopScheduler
+        scheduler ! StopScheduler
         expectNoMsg(100 millis)
       }
     }
