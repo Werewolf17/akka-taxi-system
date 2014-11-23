@@ -20,7 +20,7 @@ class Taxi(val owner: ActorRef, val tubeLocationServicePath: Option[String]) ext
 
   /// creating supervised actors
   val gps = context.actorOf(Props(classOf[GPS], self), s"gps-for-${self.path.name}")
-  val scheduler = context.actorOf(Props(classOf[Scheduler], self, 50 milliseconds, 50 milliseconds), s"scheduler-for-${self.path.name}")
+  val scheduler = context.actorOf(Props(classOf[Scheduler], self, 0 milliseconds, 50 milliseconds), s"scheduler-for-${self.path.name}")
 
   // looked-up unsupervised actors
   val tubeLocationService = tubeLocationServicePath map { context.actorSelection(_) }

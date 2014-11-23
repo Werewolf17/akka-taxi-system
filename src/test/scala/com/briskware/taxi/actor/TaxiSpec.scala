@@ -21,8 +21,8 @@ class TaxiSpec(_system: ActorSystem) extends TestKit(_system) with ImplicitSende
     "report every location to the owner" in {
 
       within(150 millis) {
-        expectMsgType[LocationReport](60 millis)
-        expectMsgType[LocationReport](60 millis)
+        expectMsgType[LocationReport](75 millis)
+        expectMsgType[LocationReport](75 millis)
       }
     }
 

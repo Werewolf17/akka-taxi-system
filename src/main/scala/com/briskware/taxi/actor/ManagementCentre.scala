@@ -28,12 +28,4 @@ class ManagementCentre(
     case LocationReport(loc) => log.info(s"received ${loc} from ${sender.path.name}")
   }
 
-  /**
-   * Once this actor is stopped - being root user level, we can shut down the entire actor system
-   * and let the application quit.
-   */
-  override def postStop(): Unit = {
-    super.postStop()
-    context.system.shutdown()
-  }
 }
