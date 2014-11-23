@@ -11,7 +11,6 @@ class TaxiSpec(_system: ActorSystem) extends TestKit(_system) with ImplicitSende
 
   def this() = this(ActorSystem("taxi-system"))
 
-
   override def afterAll {
     TestKit.shutdownActorSystem(system)
   }
@@ -30,12 +29,12 @@ class TaxiSpec(_system: ActorSystem) extends TestKit(_system) with ImplicitSende
   }
 
   "The Taxi with a Tube Location Service" must {
-    val tubeLocationService = system.actorOf(Props(classOf[TubeLocationService]), "tls")
+    val tubeLocationService = system.actorOf(Props(classOf[TubeLocationService], self), "tls")
     val taxi = system.actorOf(Props(classOf[Taxi], self, Some(tubeLocationService.path.toStringWithoutAddress)), "taxi-with-tube-location-service")
 
-    "report at least one location within 1 second to the owner" in {
+    "report at least one location within 10 seconds to the owner" in {
 
-      within(1 second) {
+      within(10 seconds) {
         expectMsgType[LocationReport]
       }
     }

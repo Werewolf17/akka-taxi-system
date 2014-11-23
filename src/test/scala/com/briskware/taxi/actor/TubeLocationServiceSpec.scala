@@ -15,7 +15,7 @@ class TubeLocationServiceSpec(_system: ActorSystem) extends TestKit(_system) wit
 
   def this() = this(ActorSystem("taxi-system"))
 
-  val tls = system.actorOf(Props(classOf[TubeLocationService]), "tube-location-service")
+  val tls = system.actorOf(Props(classOf[TubeLocationService], self), "tube-location-service")
 
   override def afterAll {
     TestKit.shutdownActorSystem(system)

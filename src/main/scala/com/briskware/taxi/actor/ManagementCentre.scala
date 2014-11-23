@@ -5,7 +5,10 @@ import com.briskware.taxi.model.Location
 
 case class LocationReport(loc: Location)
 
-class ManagementCentre(val numberOfTaxis: Int, val tubeLocationService: Option[ActorRef] = None) extends Actor with ActorLogging {
+class ManagementCentre(
+  val owner: ActorRef,
+  val numberOfTaxis: Int,
+  val tubeLocationService: Option[ActorRef] = None) extends Actor with ActorLogging {
 
   /**
    * Create a number of Taxi child actors

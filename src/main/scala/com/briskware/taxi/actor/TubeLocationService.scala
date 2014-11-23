@@ -10,7 +10,7 @@ case class CloseToTubeStationResponse(isClose: Boolean)
  * This service implementation assumes that Tube stations are located within
  * the configured distance from the centre located at long/late 50.0/0.0
  */
-class TubeLocationService extends Actor with ActorLogging {
+class TubeLocationService(val owner: ActorRef) extends Actor with ActorLogging {
 
   /**
    * distance is 1 minute lat/long
