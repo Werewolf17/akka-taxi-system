@@ -9,18 +9,18 @@ It creates and supervises a pre-configured number of underlying Taxi Actors. It 
 messages from the supervised Taxi actors and simply logs these on the console.
 
 #### Taxi
-The Taxi actor supervises it's own GPS and Scheduler Actors. The Scheduler will periodically fire a SchedulerFired messages until stopped.
-When prodded by the scheduler the Taxi actor requests it's position from the GPS actor, then if a Tube Location Service actor has been configured,
+The Taxi actor supervises its own GPS and Scheduler Actors. The Scheduler will periodically fire a SchedulerFired messages until stopped.
+When prodded by the scheduler the Taxi actor requests its position from the GPS actor, then if a Tube Location Service actor has been configured,
 it checks if the position is near the Tube station and in case it is, it will report the position to the owner - the Management Centre. If no Tube Location Service
 has been configured the location is always reported to the owner.
 
 #### GPS
-The GPS is a dedicated actor and every Taxi actor supervises it's own private instance. Although for the purpose of this exercise, this would not have been necessary,
-we are trying to emulate here the real world scenario where every taxi would have it's own GPS device installed.
+The GPS is a dedicated actor and every Taxi actor supervises its own private instance. Although for the purpose of this exercise this would not have been necessary,
+we are trying to emulate here the real world scenario where every taxi would have its own GPS device installed.
 The position the GPS device gives would normally be specific to every instance of Taxi, although in the current implementation locations are generated randomly.
 
 #### Scheduler
-Similarly to the  GPS actor, a Scheduler is created for every Taxi which triggers it to report it's own position to the Management Centre.
+Similarly to the  GPS actor, a Scheduler is created for every Taxi which triggers it to report its own position to the Management Centre.
 This is again an attempt to emulate the real world, i.e. the Taxi driver's duty to check in with the Dispatcher periodically.
 
 #### Tube Location Service
