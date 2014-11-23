@@ -1,6 +1,6 @@
 package com.briskware.taxi.actor
 
-import akka.actor.{Actor, ActorLogging}
+import akka.actor.{ActorRef, Actor, ActorLogging}
 import com.briskware.taxi.model.Location
 
 case class CloseToTubeStation(loc: Location)

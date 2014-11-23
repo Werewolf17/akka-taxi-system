@@ -14,18 +14,16 @@ import scala.util.Success
 /*
  * Taxi Actor
  */
-case object ReportLocation
-
-class Taxi extends Actor with ActorLogging {
+class Taxi(val owner: ActorRef, val tubeLocationServicePath: Option[String]) extends Actor with ActorLogging {
 
   implicit val dispatcher = context.system.dispatcher
 
   /// creating supervised actors
-  val gps = context.actorOf(Props[GPS], s"gps-for-${self.path.name}")
-  val scheduler = context.actorOf(Props[Scheduler], s"scheduler-for-${self.path.name}")
+  val gps = context.actorOf(Props(classOf[GPS], self), s"gps-for-${self.path.name}")
+  val scheduler = context.actorOf(Props(classOf[Scheduler], self, 50 milliseconds, 50 milliseconds), s"scheduler-for-${self.path.name}")
 
   // looked-up unsupervised actors
-  lazy val tubeLocationService = context.actorSelection("akka://taxi-system/user/management-centre/tube-location-service")
+  val tubeLocationService = tubeLocationServicePath map { context.actorSelection(_) }
 
   override def preStart(): Unit = {
     super.preStart()
@@ -33,79 +31,32 @@ class Taxi extends Actor with ActorLogging {
   }
 
   override def receive = {
-    case ReportLocation => gps ! GetLocation
+    case SchedulerFiring => gps ! GetLocation
     case LocationResponse(loc) => handleLocationResponse(loc)
   }
 
   /**
-   * Delegating to the Tube Location Service to compute if the location is near the a Tube Station.
+   * Delegating to the Tube Location Service (TLS) - if defined, to compute if the location is near the a Tube Station.
    * This is done via a Future in order to preserve the context. This would not have been necessary, since we are reporting
    * back to the parent of this Actor (the management centre), however
    * the code below just shows a different way of interacting with Actors and I wanted to demonstrate it here.
    */
-  private def handleLocationResponse(loc: Location) = {
-    implicit val dispatcher = context.dispatcher
-    implicit val timeout = Timeout(1 second)
-    val isCloseFuture = tubeLocationService ? CloseToTubeStation(loc)
-    isCloseFuture onComplete {
-      case Success(CloseToTubeStationResponse(isClose)) =>
-        if (isClose) context.parent ! LocationReport(loc)
-      case _ => //nop
-    }
-  }
-
-}
-
-/*
- * GPS Actor
- */
-case object GetLocation
-case class LocationResponse(loc: Location)
-
-private sealed class GPS extends Actor with ActorLogging {
-
-  override def receive = {
-    case GetLocation => sender ! LocationResponse(getRandomLocation())
-  }
-
-  protected def getRandomLocation(): Location = {
-    Location(getRandomNumber(0, 1), getRandomNumber(50, 1))
-  }
-
-  protected def getRandomNumber(base: Int, maxOffset: Int) = (base, Math.random() * maxOffset, Math.random()) match {
-    case (base, i, sign) if sign < 0.5 => base - i
-    case (base, i, _) => base + i
-  }
-
-}
-
-/*
- * Scheduler Actor
- */
-case object StartScheduler
-case object StopScheduler
-
-private sealed class Scheduler extends Actor with ActorLogging {
-
-  implicit val dispatcher = context.system.dispatcher
-
-  var schedule: Option[Cancellable] = None
-
-  override def receive = {
-    case StartScheduler =>
-      if ( !schedule.isDefined ) {
-        log.info("starting")
-        schedule = Some(context.system.scheduler.schedule(1 seconds, 50 milliseconds, sender, ReportLocation))
-      } else {
-        log.info("already started!")
+  private def handleLocationResponse(loc: Location) = tubeLocationService match {
+    // if TLS has been defined then check for Tube proximity
+    // and send message only if the location is near a Tube station
+    case Some(ref) =>
+      implicit val dispatcher = context.dispatcher
+      implicit val timeout = Timeout(1 second)
+      val isCloseFuture = ref ? CloseToTubeStation(loc)
+      isCloseFuture onComplete {
+        case Success(CloseToTubeStationResponse(isClose)) =>
+          if (isClose) owner ! LocationReport(loc)
+        case _ => //NOP
       }
-    case StopScheduler =>
-      schedule map { s =>
-        s.cancel()
-        log.info("stopped")
-      }
-      schedule = None
-
+    // if there is no TLS, then always send the report
+    case _ => owner ! LocationReport(loc)
   }
 
 }
+
+
