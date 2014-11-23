@@ -3,12 +3,12 @@ package com.briskware.taxi.actor
 import akka.actor.{ActorRef, ActorLogging, Actor}
 import com.briskware.taxi.model.Location
 
-/*
- * GPS Actor
- */
 case object GetLocation
 case class LocationResponse(loc: Location)
 
+/**
+ * GPS Actor
+ */
 class GPS(val owner: ActorRef) extends Actor with ActorLogging {
 
   override def receive = {

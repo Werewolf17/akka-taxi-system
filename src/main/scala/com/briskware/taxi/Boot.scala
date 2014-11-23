@@ -8,8 +8,8 @@ import com.briskware.taxi.actor.{TubeLocationService, ManagementCentre}
 
 object Boot extends App {
 
-  val runFor = 30 seconds
-  val graceToShutDown = 5 seconds
+  val allowToRunFor = 30 seconds
+  val graceTimeToShutDown = 5 seconds
 
   val system = ActorSystem("taxi-system")
   implicit val dispatcher = system.dispatcher
@@ -17,11 +17,14 @@ object Boot extends App {
   val main = system.actorOf(Props[Boot], "boot")
 
   // shut down the top level actors once we feel it has run long enough
-  system.scheduler.scheduleOnce(runFor, main, PoisonPill)
-  system.awaitTermination(runFor + graceToShutDown)
+  system.scheduler.scheduleOnce(allowToRunFor, main, PoisonPill)
+  system.awaitTermination(allowToRunFor + graceTimeToShutDown)
 
 }
 
+/**
+ * Top level user actor
+ */
 class Boot extends Actor with ActorLogging {
 
   override def preStart(): Unit = {

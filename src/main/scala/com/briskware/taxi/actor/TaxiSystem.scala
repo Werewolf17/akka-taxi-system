@@ -11,14 +11,16 @@ import com.briskware.taxi.model.Location
 
 import scala.util.Success
 
-/*
+/**
  * Taxi Actor
+ * @param owner
+ * @param tubeLocationServicePath
  */
 class Taxi(val owner: ActorRef, val tubeLocationServicePath: Option[String]) extends Actor with ActorLogging {
 
   implicit val dispatcher = context.system.dispatcher
 
-  /// creating supervised actors
+  // creating supervised actors
   val gps = context.actorOf(Props(classOf[GPS], self), s"gps-for-${self.path.name}")
   val scheduler = context.actorOf(Props(classOf[Scheduler], self, 0 milliseconds, 50 milliseconds), s"scheduler-for-${self.path.name}")
 

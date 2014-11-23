@@ -5,6 +5,12 @@ import com.briskware.taxi.model.Location
 
 case class LocationReport(loc: Location)
 
+/**
+ * Management Centre
+ * @param owner
+ * @param numberOfTaxis
+ * @param tubeLocationService
+ */
 class ManagementCentre(
   val owner: ActorRef,
   val numberOfTaxis: Int,

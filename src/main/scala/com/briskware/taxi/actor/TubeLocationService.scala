@@ -7,6 +7,8 @@ case class CloseToTubeStation(loc: Location)
 case class CloseToTubeStationResponse(isClose: Boolean)
 
 /**
+ * Tube Location Service
+ *
  * This service implementation assumes that Tube stations are located within
  * the configured distance from the centre located at long/late 50.0/0.0
  */

@@ -5,13 +5,16 @@ import scala.concurrent.duration._
 
 import akka.actor.{ActorRef, Cancellable, ActorLogging, Actor}
 
-/*
- * Scheduler Actor
- */
 case object StartScheduler
 case object StopScheduler
 case object SchedulerFiring
 
+/**
+ * Scheduler Actor
+ * @param owner
+ * @param initialDelay
+ * @param interval
+ */
 class Scheduler(
   val owner: ActorRef,
   val initialDelay: FiniteDuration,
