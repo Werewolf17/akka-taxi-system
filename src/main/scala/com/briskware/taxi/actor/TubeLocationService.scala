@@ -20,6 +20,7 @@ class TubeLocationService(val owner: ActorRef) extends Actor with ActorLogging {
   val distance = 1D/60D
 
   var count = 0L
+  var countNearTubeStation = 0L
 
   override def receive: Receive = {
     case CloseToTubeStation(loc) =>
@@ -28,12 +29,15 @@ class TubeLocationService(val owner: ActorRef) extends Actor with ActorLogging {
   }
 
   private def isCloseToTubeStation(loc: Location) = loc match {
-    case Location(long,lat) if Math.abs(Math.abs(lat) - 50.0D) < distance && Math.abs(long) < distance => true
-    case _ => false
+    case Location(long,lat) if Math.abs(Math.abs(lat) - 50.0D) < distance && Math.abs(long) < distance =>
+      countNearTubeStation += 1
+      true
+    case _ =>
+      false
   }
 
   override def postStop(): Unit = {
     super.postStop()
-    log.info(s"actor ${self.path.name} processed $count messages.")
+    log.info(s"stopping, processed $count locations ($countNearTubeStation were near a Tube Station).")
   }
 }
